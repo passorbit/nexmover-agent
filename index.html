@@ -646,14 +646,14 @@ async function handleUserInput(text) {
 
   try {
     const res = await fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: chatHistory.slice(-20),
-        generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
-      })
-    });
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: chatHistory.slice(-20),
+    generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+  })
+});
 
     const data = await res.json();
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "দুঃখিত, একটু সমস্যা হয়েছে। আবার চেষ্টা করুন।";
