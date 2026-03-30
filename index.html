@@ -645,18 +645,27 @@ async function handleUserInput(text) {
   chatHistory.push({ role: 'user', parts: [{ text }] });
 
   try {
-    const res = await fetch(WORKER_URL, {
+    const messages = [
+  { role: 'system', content: SYSTEM_PROMPT },
+  ...chatHistory.slice(-20).map(m => ({
+    role: m.role === 'model' ? 'assistant' : 'user',
+    content: m.parts[0].text
+  }))
+];
+
+const res = await fetch(WORKER_URL, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
-    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: chatHistory.slice(-20),
-    generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+    model: 'llama-3.3-70b-versatile',
+    messages: messages,
+    temperature: 0.7,
+    max_tokens: 600
   })
 });
 
     const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "দুঃখিত, একটু সমস্যা হয়েছে। আবার চেষ্টা করুন।";
+    const reply = data.choices?.[0]?.message?.content || "দুঃখিত, একটু সমস্যা হয়েছে। আবার চেষ্টা করুন।";
 
     removeTyping();
 
