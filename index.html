@@ -645,7 +645,7 @@ async function handleUserInput(text) {
   chatHistory.push({ role: 'user', parts: [{ text }] });
 
   try {
-    const res = await fetch(`WORKER_URL`, {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
