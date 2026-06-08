@@ -828,6 +828,7 @@ document.getElementById('chat-input').addEventListener('keydown', e => {
 // Function to safely replace Shortcodes with UI Cards
 function formatMessageWithPackages(text) {
   let result = text;
+  let isPackageShown = false; // প্যাকেজ দেখানো হয়েছে কিনা তা চেক করার জন্য
 
   // সবগুলোর UI কার্ডের ডিজাইন ডিকশনারি
   const cards = {
@@ -928,13 +929,23 @@ function formatMessageWithPackages(text) {
       </div>`
   };
 
-  // AI-এর টেক্সটের ভেতর যেখানে যেখানে শর্টকোড পাবে, শুধু সেই জায়গাটুকু কার্ড দিয়ে রিপ্লেস করবে
+  // AI-এর টেক্সটের ভেতর যেখানে যেখানে শর্টকোড পাবে, সেটি রিপ্লেস করবে
   for (const [code, html] of Object.entries(cards)) {
-    result = result.split(code).join(html);
+    if (result.includes(code)) {
+      result = result.split(code).join(html);
+      isPackageShown = true; // প্যাকেজ পাওয়া গেছে
+    }
   }
 
   // লাইন ব্রেক ঠিক করা
-  return result.replace(/\n/g, '<br>');
+  result = result.replace(/\n/g, '<br>');
+
+  // যদি কোনো প্যাকেজ দেখানো হয়, তাহলে শেষে আপনার অর্ডার করার মেসেজটি যোগ করে দেবে
+  if (isPackageShown) {
+    result += `<div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed #333; font-size: 0.85rem; color: #00e5a0; font-weight: 500; line-height: 1.5;">আপনি যদি অর্ডার করতে চান, তাহলে আমাদের কিছু তথ্য প্রয়োজন। অনুগ্রহ করে আমাদের জানান।</div>`;
+  }
+
+  return result;
 }
 
 </script>
