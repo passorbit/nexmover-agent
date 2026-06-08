@@ -497,6 +497,7 @@ let initialized = false;
 let currentOrder = null;
 
 // ── TOGGLE ──
+// ── TOGGLE ──
 function toggleChat() {
   isOpen = !isOpen;
   const win = document.getElementById('chat-window');
@@ -512,6 +513,16 @@ function toggleChat() {
     initialized = true;
     initChat();
   }
+
+  // --- NEW CODE: Send message to parent window (WordPress) ---
+  if (isOpen) {
+    // চ্যাট ওপেন হলে iframe বড় করার সিগন্যাল
+    window.parent.postMessage({ action: 'openChat' }, '*');
+  } else {
+    // চ্যাট ক্লোজ হলে iframe ছোট করার সিগন্যাল
+    window.parent.postMessage({ action: 'closeChat' }, '*');
+  }
+  // -----------------------------------------------------------
 }
 
 function initChat() {
