@@ -846,98 +846,146 @@ document.getElementById('chat-input').addEventListener('keydown', e => {
 
 
 // Function to detect and format packages (এখন এটি স্বাধীন এবং গ্লোবাল)
+// Function to detect and format packages (Smart Paragraph Method)
 function formatMessageWithPackages(text) {
-  let formattedText = text;
+  // টেক্সটকে লাইন বা প্যারাগ্রাফ অনুযায়ী ভাগ করা
+  let paragraphs = text.split(/\n+/);
+  let newParagraphs = [];
 
-  // 1. Social Starter Package
-  if (formattedText.includes("Social Starter") && formattedText.includes("3,000")) {
-    const cardHtml = `
-      <div class="package-card">
-        <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic</div>
-        <div class="pkg-header">Social Starter</div>
-        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
-        <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
-        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
-        <ul class="pkg-features">
-          <li>৬টি Social Media Post (Facebook/Instagram)</li>
-          <li>১টি Story Template</li>
-          <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
-          <li>JPG + PNG ডেলিভারি</li>
-          <li>২ বার Revision</li>
-          <li>WhatsApp-এ ডেলিভারি</li>
-        </ul>
-        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Freelancer</span>
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">ছোট ব্যবসা</span>
+  for (let p of paragraphs) {
+    if (p.trim() === "") continue;
+    let matched = false;
+
+    // ==========================================
+    // 🎨 GRAPHICS DESIGN PACKAGES
+    // ==========================================
+    if (p.includes("Social Starter")) {
+      newParagraphs.push(`
+        <div class="package-card">
+          <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic</div>
+          <div class="pkg-header">Social Starter</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
+          <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
+          <ul class="pkg-features">
+            <li>৬টি Social Media Post</li>
+            <li>১টি Story Template</li>
+            <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
+            <li>JPG + PNG ডেলিভারি</li>
+            <li>২ বার Revision</li>
+          </ul>
         </div>
-      </div>
-    `;
-    formattedText = formattedText.replace(/1\.\s*Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
-    formattedText = formattedText.replace(/Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
+      `);
+      matched = true;
+    }
+    else if (p.includes("Brand Boost")) {
+      newParagraphs.push(`
+        <div class="package-card" style="border-color: #0062f5; position: relative;">
+          <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
+          <div class="pkg-header">Brand Boost</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
+          <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
+          <ul class="pkg-features">
+            <li>Basic Brand Identity (Logo+Color+Font)</li>
+            <li>১৩টি Social Media Post</li>
+            <li>৩টি Story Template</li>
+            <li>Facebook Cover + Profile Photo</li>
+            <li>Unlimited Revision (পোস্টে)</li>
+          </ul>
+        </div>
+      `);
+      matched = true;
+    }
+    else if (p.includes("Identity Pro")) {
+      newParagraphs.push(`
+        <div class="package-card">
+          <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro</div>
+          <div class="pkg-header">Identity Pro</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সম্পূর্ণ ব্র্যান্ড ও কনটেন্ট</div>
+          <div class="pkg-price">৳৮,০০০ <span>/ মাস</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Corporate মান, বাজেট দামে</div>
+          <ul class="pkg-features">
+            <li>Full Brand Identity & Guideline</li>
+            <li>২২টি Social Media Post</li>
+            <li>৬টি Story + ৩টি Reel Cover</li>
+            <li>Business Card & Banner Design</li>
+            <li>Unlimited Revision & Source Files</li>
+          </ul>
+        </div>
+      `);
+      matched = true;
+    }
+
+    // ==========================================
+    // 🌐 WEB DESIGN PACKAGES
+    // ==========================================
+    else if (p.includes("Web Starter")) {
+      newParagraphs.push(`
+        <div class="package-card">
+          <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic Web</div>
+          <div class="pkg-header">Web Starter</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ছোট ব্যবসা বা পোর্টফোলিও</div>
+          <div class="pkg-price">৳৫,৫০০ <span>(একবার)</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Domain + Hosting বাদে</div>
+          <ul class="pkg-features">
+            <li>৫ পেজের WordPress সাইট</li>
+            <li>Mobile Responsive Design</li>
+            <li>Premium Theme Setup</li>
+            <li>WhatsApp Chat Button</li>
+            <li>১ মাস ফ্রি সাপোর্ট</li>
+          </ul>
+        </div>
+      `);
+      matched = true;
+    }
+    else if (p.includes("Business Pro")) {
+      newParagraphs.push(`
+        <div class="package-card" style="border-color: #0062f5; position: relative;">
+          <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
+          <div class="pkg-header">Business Pro</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">Startup ও Service Business</div>
+          <div class="pkg-price">৳১২,০০০ <span>(একবার)</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Advance SEO ও স্পিড অপ্টিমাইজড</div>
+          <ul class="pkg-features">
+            <li>১০ পেজের Custom WordPress সাইট</li>
+            <li>Custom UI (Elementor Pro)</li>
+            <li>Speed & Performance Optimization</li>
+            <li>Google Analytics + FB Pixel</li>
+            <li>৩ মাস ফ্রি সাপোর্ট</li>
+          </ul>
+        </div>
+      `);
+      matched = true;
+    }
+    else if (p.includes("E-commerce Lite") || p.includes("Ecommerce Lite")) {
+      newParagraphs.push(`
+        <div class="package-card">
+          <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro E-com</div>
+          <div class="pkg-header">E-commerce Lite</div>
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">F-commerce থেকে Online Shop</div>
+          <div class="pkg-price">৳২২,০০০ <span>(একবার)</span></div>
+          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Full Functional E-commerce সাইট</div>
+          <ul class="pkg-features">
+            <li>WooCommerce Setup (৫০টি প্রোডাক্ট)</li>
+            <li>bKash, Nagad ও COD Payment</li>
+            <li>Product Filter ও Discount System</li>
+            <li>Full SEO ও Admin Panel Training</li>
+            <li>৬ মাস ফ্রি সাপোর্ট</li>
+          </ul>
+        </div>
+      `);
+      matched = true;
+    }
+
+    // যদি কোনো প্যাকেজের নাম না থাকে, তাহলে AI এর সাধারণ কথাগুলো যেমন আছে তেমনই প্রিন্ট করবে
+    if (!matched) {
+      newParagraphs.push(p);
+    }
   }
 
-  // 2. Brand Boost Package
-  if (formattedText.includes("Brand Boost") && formattedText.includes("5,500")) {
-    const cardHtml = `
-      <div class="package-card" style="border-color: #0062f5; position: relative;">
-        <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
-        <div class="pkg-header">Brand Boost</div>
-        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
-        <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
-        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
-        <ul class="pkg-features">
-          <li>Basic Brand Identity (Logo + Color + Font)</li>
-          <li>Brand Guidelines (১ পেজ)</li>
-          <li>১৩টি Social Media Post</li>
-          <li>৩টি Story Template</li>
-          <li>Facebook Cover + Profile Photo</li>
-          <li>Unlimited Revision (পোস্টে)</li>
-          <li>JPG + PNG + PDF সোর্স</li>
-          <li>৭ কার্যদিবসে Brand ডেলিভারি</li>
-        </ul>
-        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Startup</span>
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">SME</span>
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">F-commerce</span>
-        </div>
-      </div>
-    `;
-    formattedText = formattedText.replace(/2\.\s*Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
-    formattedText = formattedText.replace(/Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
-  }
-
-  // 3. Identity Pro Package
-  if (formattedText.includes("Identity Pro") && formattedText.includes("8,000")) {
-    const cardHtml = `
-      <div class="package-card">
-        <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro</div>
-        <div class="pkg-header">Identity Pro</div>
-        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সম্পূর্ণ ব্র্যান্ড ও কনটেন্ট</div>
-        <div class="pkg-price">৳৮,০০০ <span>/ মাস</span></div>
-        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Corporate মান, বাজেট দামে</div>
-        <ul class="pkg-features">
-          <li>Full Brand Identity (Logo, Color, Font, Pattern)</li>
-          <li>Brand Guideline Booklet (৪-৫ পেজ)</li>
-          <li>২২টি Social Media Post</li>
-          <li>৬টি Story + ৩টি Reel Cover</li>
-          <li>Business Card Design</li>
-          <li>১টি Promotional Banner / Flyer</li>
-          <li>Unlimited Revision</li>
-          <li>সব ফরম্যাটে সোর্স ফাইল (AI/PSD/PDF)</li>
-          <li>১ মাস After-Support</li>
-        </ul>
-        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">SME</span>
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Agency</span>
-          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Rebranding</span>
-        </div>
-      </div>
-    `;
-    formattedText = formattedText.replace(/3\.\s*Identity Pro.*?1 মাস After-Support/is, cardHtml);
-    formattedText = formattedText.replace(/Identity Pro.*?1 মাস After-Support/is, cardHtml);
-  }
-
-  return formattedText.replace(/\n/g, '<br>');
+  // সব প্যারাগ্রাফ এবং কার্ডগুলো সুন্দরভাবে জোড়া লাগানো
+  return newParagraphs.join('<br><br>');
 }
 
 </script>
