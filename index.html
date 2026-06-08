@@ -503,54 +503,36 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRMgGHKhLT4bX4
 const BUSINESS_EMAIL = "info@nexmover.com";
 const WHATSAPP = "8801616797214";
 
-const SYSTEM_PROMPT = `You are Nex, the AI assistant for NexMover — a professional digital agency in Bangladesh offering WordPress web development and graphics design services.
+const SYSTEM_PROMPT = `You are Nex, the AI assistant for NexMover — a professional digital agency in Bangladesh.
+Your personality: Friendly, professional. Speak in the user's language (Bangla, English, or Banglish).
 
-Your personality: Friendly, professional, helpful. Speak in the same language the customer uses. If they write in Bangla, reply in Bangla. If English, reply in English. If Banglish, match that too.
+=== SERVICES, PRICES & SHORTCODES (CRITICAL RULE) ===
+Below are our packages. You know the details to help the customer, but to display them, you MUST NOT type out the features manually. Instead, you MUST use the exact [SHORTCODE]. The system will automatically convert these shortcodes into beautiful UI cards.
 
-Your goal: Understand what the customer needs, recommend the right package, collect their order details (name, service/package, contact number, email if available, requirements), then confirm the order.
+--- GRAPHICS DESIGN ---
+1. Social Starter (৳3,000/mo) -> To show this, output ONLY: [SHOW_SOCIAL_STARTER]
+2. Brand Boost (৳5,500/mo) -> To show this, output ONLY: [SHOW_BRAND_BOOST]
+3. Identity Pro (৳8,000/mo) -> To show this, output ONLY: [SHOW_IDENTITY_PRO]
 
-=== SERVICES & PACKAGES ===
+--- WORDPRESS WEB DESIGN ---
+1. Web Starter (৳5,500) -> To show this, output ONLY: [SHOW_WEB_STARTER]
+2. Business Pro (৳12,000) -> To show this, output ONLY: [SHOW_BUSINESS_PRO]
+3. E-commerce Lite (৳22,000) -> To show this, output ONLY: [SHOW_ECOMMERCE_LITE]
 
---- GRAPHICS DESIGN — Social Media & Brand Identity ---
+=== CONVERSATION RULES ===
+1. If the user clicks "🎨 Graphics Design" or asks to see packages, you MUST output all 3 graphics shortcodes sequentially so they can see all options. Example response:
+"আমাদের গ্রাফিক্স ডিজাইনের ৩টি প্যাকেজ রয়েছে:
+[SHOW_SOCIAL_STARTER]
+[SHOW_BRAND_BOOST]
+[SHOW_IDENTITY_PRO]
+আপনার বাজেট বা প্রয়োজন অনুযায়ী কোনটি ভালো হবে?"
 
-1. Social Starter (Basic) — ৳3,000/month
-   For: Freelancers, ছোট ব্যবসা
-   Includes: 6টি Social Media Post (Facebook/Instagram), 1টি Story Template, Brand color ও font অনুযারী design, JPG + PNG delivery, 2 বার Revision, WhatsApp-এ delivery
-
-2. Brand Boost (Best Seller) — ৳5,500/month
-   For: Startup, SME, F-commerce
-   Includes: Basic Brand Identity (Logo + Color + Font), Brand Guidelines (1 page), 13টি Social Media Post, 3টি Story Template, Facebook Cover + Profile Photo, Unlimited Revision (posts), JPG + PNG + PDF source, 7 কার্যদিবসে Brand delivery
-
-3. Identity Pro (Pro) — ৳8,000/month
-   For: SME, Agency, Rebranding
-   Includes: Full Brand Identity (Logo, Color, Font, Pattern), Brand Guideline Booklet (4-5 pages), 22টি Social Media Post, 6টি Story + 3টি Reel Cover, Business Card Design, 1টি Promotional Banner/Flyer, Unlimited Revision, All formats source file (AI/PSD/PDF), 1 মাস After-Support
-
---- WORDPRESS WEB DESIGN PACKAGES ---
-
-1. Web Starter (Basic) — ৳5,500 (একবার) — Domain + Hosting বাদে
-   For: Freelancers, ছোট ব্যবসা
-   Includes: 5 পেজের WordPress সাইট, Mobile Responsive Design, Premium Theme Setup, Contact Form + Google Map, Basic SEO Setup, WhatsApp Chat Button, 1 মাস ফ্রি সাপোর্ট, 7-10 কার্যদিবস ডেলিভারি
-
-2. Business Pro (Best Seller) — ৳12,000 (একবার)
-   For: Startup, SME, Service Business
-   Includes: 10 পেজের Custom WordPress সাইট, Custom UI Design (Elementor Pro), Speed & Performance Optimization, Advanced SEO (RankMath Setup), Blog/Portfolio Section, WhatsApp + Messenger Chat, Google Analytics + FB Pixel, SSL + Basic Security, 3 মাস ফ্রি সাপোর্ট, 12-15 কার্যদিবস ডেলিভারি
-
-3. E-commerce Lite (Pro) — ৳22,000 (একবার)
-   For: F-commerce → Website, Online Shop
-   Includes: WooCommerce E-commerce সাইট, 50টি পর্যন্ত Product Setup, bKash + Nagad + COD Payment, Product Filter + Search, Coupon/Discount System, Facebook Shop Integration, Full SEO + Speed Optimization, Admin প্যানেল ব্যবহার প্রশিক্ষণ, 6 মাস ফ্রি সাপোর্ট, 20-25 কার্যদিবস ডেলিভারি
+2. If the user asks for "🌐 WordPress Website", output all 3 Web Design shortcodes in the same way.
 
 === ORDER COLLECTION FLOW ===
-When customer is ready to order, collect:
-1. Full name
-2. Which service + package
-3. Phone number (required)
-4. Email (optional)
-5. Brief project requirements
-
-After collecting all info, output ONLY this exact JSON block (nothing else after it):
-[ORDER_READY]{"name":"...","service":"...","package":"...","phone":"...","email":"...","requirements":"..."}[/ORDER_READY]
-
-Do NOT ask for more than needed. Keep conversation natural and warm. If customer is unsure, help them choose the right package based on their needs and budget.`;
+When customer is ready to order, collect: 1. Name 2. Package 3. Phone 4. Email (opt) 5. Requirements.
+Output ONLY this exact JSON block at the end to confirm:
+[ORDER_READY]{"name":"...","service":"...","package":"...","phone":"...","email":"...","requirements":"..."}[/ORDER_READY]`;
 
 let chatHistory = [];
 let isOpen = false;
@@ -846,146 +828,116 @@ document.getElementById('chat-input').addEventListener('keydown', e => {
 
 
 // Function to detect and format packages (এখন এটি স্বাধীন এবং গ্লোবাল)
-// Function to detect and format packages (Smart Paragraph Method)
+// Function to safely replace Shortcodes with UI Cards
 function formatMessageWithPackages(text) {
-  // টেক্সটকে লাইন বা প্যারাগ্রাফ অনুযায়ী ভাগ করা
-  let paragraphs = text.split(/\n+/);
-  let newParagraphs = [];
+  let result = text;
 
-  for (let p of paragraphs) {
-    if (p.trim() === "") continue;
-    let matched = false;
+  // সবগুলোর UI কার্ডের ডিজাইন ডিকশনারি
+  const cards = {
+    '[SHOW_SOCIAL_STARTER]': `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic</div>
+        <div class="pkg-header">Social Starter</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
+        <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
+        <ul class="pkg-features">
+          <li>৬টি Social Media Post (Facebook/Instagram)</li>
+          <li>১টি Story Template</li>
+          <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
+          <li>JPG + PNG ডেলিভারি</li>
+          <li>২ বার Revision</li>
+        </ul>
+      </div>`,
+      
+    '[SHOW_BRAND_BOOST]': `
+      <div class="package-card" style="border-color: #0062f5; position: relative;">
+        <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
+        <div class="pkg-header">Brand Boost</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
+        <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
+        <ul class="pkg-features">
+          <li>Basic Brand Identity (Logo+Color+Font)</li>
+          <li>১৩টি Social Media Post</li>
+          <li>৩টি Story Template</li>
+          <li>Facebook Cover + Profile Photo</li>
+          <li>Unlimited Revision (পোস্টে)</li>
+        </ul>
+      </div>`,
+      
+    '[SHOW_IDENTITY_PRO]': `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro</div>
+        <div class="pkg-header">Identity Pro</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সম্পূর্ণ ব্র্যান্ড ও কনটেন্ট</div>
+        <div class="pkg-price">৳৮,০০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Corporate মান, বাজেট দামে</div>
+        <ul class="pkg-features">
+          <li>Full Brand Identity & Guidelines</li>
+          <li>২২টি Social Media Post</li>
+          <li>৬টি Story + ৩টি Reel Cover</li>
+          <li>Business Card & Banner Design</li>
+          <li>Unlimited Revision & Source Files</li>
+        </ul>
+      </div>`,
 
-    // ==========================================
-    // 🎨 GRAPHICS DESIGN PACKAGES
-    // ==========================================
-    if (p.includes("Social Starter")) {
-      newParagraphs.push(`
-        <div class="package-card">
-          <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic</div>
-          <div class="pkg-header">Social Starter</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
-          <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
-          <ul class="pkg-features">
-            <li>৬টি Social Media Post</li>
-            <li>১টি Story Template</li>
-            <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
-            <li>JPG + PNG ডেলিভারি</li>
-            <li>২ বার Revision</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
-    else if (p.includes("Brand Boost")) {
-      newParagraphs.push(`
-        <div class="package-card" style="border-color: #0062f5; position: relative;">
-          <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
-          <div class="pkg-header">Brand Boost</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
-          <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
-          <ul class="pkg-features">
-            <li>Basic Brand Identity (Logo+Color+Font)</li>
-            <li>১৩টি Social Media Post</li>
-            <li>৩টি Story Template</li>
-            <li>Facebook Cover + Profile Photo</li>
-            <li>Unlimited Revision (পোস্টে)</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
-    else if (p.includes("Identity Pro")) {
-      newParagraphs.push(`
-        <div class="package-card">
-          <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro</div>
-          <div class="pkg-header">Identity Pro</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সম্পূর্ণ ব্র্যান্ড ও কনটেন্ট</div>
-          <div class="pkg-price">৳৮,০০০ <span>/ মাস</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Corporate মান, বাজেট দামে</div>
-          <ul class="pkg-features">
-            <li>Full Brand Identity & Guideline</li>
-            <li>২২টি Social Media Post</li>
-            <li>৬টি Story + ৩টি Reel Cover</li>
-            <li>Business Card & Banner Design</li>
-            <li>Unlimited Revision & Source Files</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
+    '[SHOW_WEB_STARTER]': `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic Web</div>
+        <div class="pkg-header">Web Starter</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ছোট ব্যবসা বা পোর্টফোলিও</div>
+        <div class="pkg-price">৳৫,৫০০ <span>(একবার)</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Domain + Hosting বাদে</div>
+        <ul class="pkg-features">
+          <li>৫ পেজের WordPress সাইট</li>
+          <li>Mobile Responsive Design</li>
+          <li>Premium Theme Setup</li>
+          <li>WhatsApp Chat Button</li>
+          <li>১ মাস ফ্রি সাপোর্ট</li>
+        </ul>
+      </div>`,
 
-    // ==========================================
-    // 🌐 WEB DESIGN PACKAGES
-    // ==========================================
-    else if (p.includes("Web Starter")) {
-      newParagraphs.push(`
-        <div class="package-card">
-          <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic Web</div>
-          <div class="pkg-header">Web Starter</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ছোট ব্যবসা বা পোর্টফোলিও</div>
-          <div class="pkg-price">৳৫,৫০০ <span>(একবার)</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Domain + Hosting বাদে</div>
-          <ul class="pkg-features">
-            <li>৫ পেজের WordPress সাইট</li>
-            <li>Mobile Responsive Design</li>
-            <li>Premium Theme Setup</li>
-            <li>WhatsApp Chat Button</li>
-            <li>১ মাস ফ্রি সাপোর্ট</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
-    else if (p.includes("Business Pro")) {
-      newParagraphs.push(`
-        <div class="package-card" style="border-color: #0062f5; position: relative;">
-          <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
-          <div class="pkg-header">Business Pro</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">Startup ও Service Business</div>
-          <div class="pkg-price">৳১২,০০০ <span>(একবার)</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Advance SEO ও স্পিড অপ্টিমাইজড</div>
-          <ul class="pkg-features">
-            <li>১০ পেজের Custom WordPress সাইট</li>
-            <li>Custom UI (Elementor Pro)</li>
-            <li>Speed & Performance Optimization</li>
-            <li>Google Analytics + FB Pixel</li>
-            <li>৩ মাস ফ্রি সাপোর্ট</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
-    else if (p.includes("E-commerce Lite") || p.includes("Ecommerce Lite")) {
-      newParagraphs.push(`
-        <div class="package-card">
-          <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro E-com</div>
-          <div class="pkg-header">E-commerce Lite</div>
-          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">F-commerce থেকে Online Shop</div>
-          <div class="pkg-price">৳২২,০০০ <span>(একবার)</span></div>
-          <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Full Functional E-commerce সাইট</div>
-          <ul class="pkg-features">
-            <li>WooCommerce Setup (৫০টি প্রোডাক্ট)</li>
-            <li>bKash, Nagad ও COD Payment</li>
-            <li>Product Filter ও Discount System</li>
-            <li>Full SEO ও Admin Panel Training</li>
-            <li>৬ মাস ফ্রি সাপোর্ট</li>
-          </ul>
-        </div>
-      `);
-      matched = true;
-    }
+    '[SHOW_BUSINESS_PRO]': `
+      <div class="package-card" style="border-color: #0062f5; position: relative;">
+        <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
+        <div class="pkg-header">Business Pro</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">Startup ও Service Business</div>
+        <div class="pkg-price">৳১২,০০০ <span>(একবার)</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Advance SEO ও স্পিড অপ্টিমাইজড</div>
+        <ul class="pkg-features">
+          <li>১০ পেজের Custom WordPress সাইট</li>
+          <li>Custom UI (Elementor Pro)</li>
+          <li>Speed & Performance Optimization</li>
+          <li>Google Analytics + FB Pixel</li>
+          <li>৩ মাস ফ্রি সাপোর্ট</li>
+        </ul>
+      </div>`,
 
-    // যদি কোনো প্যাকেজের নাম না থাকে, তাহলে AI এর সাধারণ কথাগুলো যেমন আছে তেমনই প্রিন্ট করবে
-    if (!matched) {
-      newParagraphs.push(p);
-    }
+    '[SHOW_ECOMMERCE_LITE]': `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro E-com</div>
+        <div class="pkg-header">E-commerce Lite</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">F-commerce থেকে Online Shop</div>
+        <div class="pkg-price">৳২২,০০০ <span>(একবার)</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Full Functional E-commerce সাইট</div>
+        <ul class="pkg-features">
+          <li>WooCommerce Setup (৫০টি প্রোডাক্ট)</li>
+          <li>bKash, Nagad ও COD Payment</li>
+          <li>Product Filter ও Discount System</li>
+          <li>Full SEO ও Admin Panel Training</li>
+          <li>৬ মাস ফ্রি সাপোর্ট</li>
+        </ul>
+      </div>`
+  };
+
+  // AI-এর টেক্সটের ভেতর যেখানে যেখানে শর্টকোড পাবে, শুধু সেই জায়গাটুকু কার্ড দিয়ে রিপ্লেস করবে
+  for (const [code, html] of Object.entries(cards)) {
+    result = result.split(code).join(html);
   }
 
-  // সব প্যারাগ্রাফ এবং কার্ডগুলো সুন্দরভাবে জোড়া লাগানো
-  return newParagraphs.join('<br><br>');
+  // লাইন ব্রেক ঠিক করা
+  return result.replace(/\n/g, '<br>');
 }
 
 </script>
