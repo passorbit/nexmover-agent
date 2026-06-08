@@ -827,19 +827,24 @@ function editOrder() {
   chatHistory.push({ role: 'model', parts: [{ text: "কোন তথ্য পরিবর্তন করতে চান?" }] });
 }
 
+// --- আগের কোড ঠিক থাকবে ---
+
 // auto-resize textarea
 document.getElementById('chat-input').addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 100) + 'px';
 });
 
+// এখানে ব্র্যাকেট ঠিক করা হয়েছে
 document.getElementById('chat-input').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
   }
+}); // <-- এই ব্র্যাকেটটি আগে নিচে ছিল, এটি এখানে হবে!
 
-  // Function to detect and format packages
+
+// Function to detect and format packages (এখন এটি স্বাধীন এবং গ্লোবাল)
 function formatMessageWithPackages(text) {
   let formattedText = text;
 
@@ -851,11 +856,11 @@ function formatMessageWithPackages(text) {
         <div class="pkg-header">Social Starter</div>
         <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
         <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
-        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
         <ul class="pkg-features">
           <li>৬টি Social Media Post (Facebook/Instagram)</li>
           <li>১টি Story Template</li>
-          <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
+          <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
           <li>JPG + PNG ডেলিভারি</li>
           <li>২ বার Revision</li>
           <li>WhatsApp-এ ডেলিভারি</li>
@@ -866,7 +871,6 @@ function formatMessageWithPackages(text) {
         </div>
       </div>
     `;
-    // AI এর প্লেইন টেক্সট রিপ্লেস করা (১ম প্যাকেজ)
     formattedText = formattedText.replace(/1\.\s*Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
     formattedText = formattedText.replace(/Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
   }
@@ -879,7 +883,7 @@ function formatMessageWithPackages(text) {
         <div class="pkg-header">Brand Boost</div>
         <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
         <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
-        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
         <ul class="pkg-features">
           <li>Basic Brand Identity (Logo + Color + Font)</li>
           <li>Brand Guidelines (১ পেজ)</li>
@@ -897,7 +901,6 @@ function formatMessageWithPackages(text) {
         </div>
       </div>
     `;
-    // AI এর প্লেইন টেক্সট রিপ্লেস করা (২য় প্যাকেজ)
     formattedText = formattedText.replace(/2\.\s*Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
     formattedText = formattedText.replace(/Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
   }
@@ -929,15 +932,13 @@ function formatMessageWithPackages(text) {
         </div>
       </div>
     `;
-    // AI এর প্লেইন টেক্সট রিপ্লেস করা (৩য় প্যাকেজ)
     formattedText = formattedText.replace(/3\.\s*Identity Pro.*?1 মাস After-Support/is, cardHtml);
     formattedText = formattedText.replace(/Identity Pro.*?1 মাস After-Support/is, cardHtml);
   }
 
-  // লাইন ব্রেক ঠিক করা যদি সাধারণ টেক্সট হয়
   return formattedText.replace(/\n/g, '<br>');
 }
-});
+
 </script>
 </body>
 </html>
