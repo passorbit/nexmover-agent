@@ -399,6 +399,66 @@ body {
 @media (max-width: 420px) {
   #chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 4.5rem; height: 70vh; }
   #chat-trigger { bottom: 1rem; right: 1rem; }
+
+  /* Package Card UI */
+.package-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.pkg-header {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--accent);
+  margin-bottom: 0.25rem;
+}
+
+.pkg-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.pkg-price span {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.pkg-desc {
+  font-size: 0.8rem;
+  color: #00e5a0;
+  margin-bottom: 0.75rem;
+}
+
+.pkg-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+
+.pkg-features li {
+  font-size: 0.85rem;
+  color: var(--text);
+  padding: 0.3rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.pkg-features li::before {
+  content: '✓';
+  color: var(--accent);
+  font-weight: bold;
+}
 }
 </style>
 </head>
@@ -549,9 +609,19 @@ function addMessage(role, text, skipHistory = false) {
   div.className = `msg ${role}`;
 
   const avText = role === 'ai' ? 'N' : 'U';
+  
+  // --- NEW: Format text to check for packages ---
+  let formattedText = text;
+  if (role === 'ai') {
+     formattedText = formatMessageWithPackages(text);
+  } else {
+     formattedText = text.replace(/\n/g, '<br>');
+  }
+  // --------------------------------------------
+
   div.innerHTML = `
     <div class="msg-av">${avText}</div>
-    <div class="bubble">${text.replace(/\n/g, '<br>')}</div>
+    <div class="bubble">${formattedText}</div>
   `;
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
@@ -768,6 +838,105 @@ document.getElementById('chat-input').addEventListener('keydown', e => {
     e.preventDefault();
     sendMessage();
   }
+
+  // Function to detect and format packages
+function formatMessageWithPackages(text) {
+  let formattedText = text;
+
+  // 1. Social Starter Package
+  if (formattedText.includes("Social Starter") && formattedText.includes("3,000")) {
+    const cardHtml = `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f0f0f0; color: #333; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Basic</div>
+        <div class="pkg-header">Social Starter</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সোশ্যাল মিডিয়ায় শুরু করতে</div>
+        <div class="pkg-price">৳৩,০০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">৳৫০০/পোস্ট — শুরু করার জন্য সাশ্রয়ী</div>
+        <ul class="pkg-features">
+          <li>৬টি Social Media Post (Facebook/Instagram)</li>
+          <li>১টি Story Template</li>
+          <li>ব্র্যান্ড কালার ও ফন্ট অনুযায়ী ডিজাইন</li>
+          <li>JPG + PNG ডেলিভারি</li>
+          <li>২ বার Revision</li>
+          <li>WhatsApp-এ ডেলিভারি</li>
+        </ul>
+        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Freelancer</span>
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">ছোট ব্যবসা</span>
+        </div>
+      </div>
+    `;
+    // AI এর প্লেইন টেক্সট রিপ্লেস করা (১ম প্যাকেজ)
+    formattedText = formattedText.replace(/1\.\s*Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
+    formattedText = formattedText.replace(/Social Starter.*?WhatsApp-এ delivery/is, cardHtml);
+  }
+
+  // 2. Brand Boost Package
+  if (formattedText.includes("Brand Boost") && formattedText.includes("5,500")) {
+    const cardHtml = `
+      <div class="package-card" style="border-color: #0062f5; position: relative;">
+        <div style="font-size: 0.65rem; background: #e0eeff; color: #0062f5; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">সেরা মানের</div>
+        <div class="pkg-header">Brand Boost</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">ব্র্যান্ড গোছানো + সোশ্যাল পোস্ট</div>
+        <div class="pkg-price">৳৫,৫০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Logo + Posts একসাথে — সবচেয়ে জনপ্রিয়</div>
+        <ul class="pkg-features">
+          <li>Basic Brand Identity (Logo + Color + Font)</li>
+          <li>Brand Guidelines (১ পেজ)</li>
+          <li>১৩টি Social Media Post</li>
+          <li>৩টি Story Template</li>
+          <li>Facebook Cover + Profile Photo</li>
+          <li>Unlimited Revision (পোস্টে)</li>
+          <li>JPG + PNG + PDF সোর্স</li>
+          <li>৭ কার্যদিবসে Brand ডেলিভারি</li>
+        </ul>
+        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Startup</span>
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">SME</span>
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">F-commerce</span>
+        </div>
+      </div>
+    `;
+    // AI এর প্লেইন টেক্সট রিপ্লেস করা (২য় প্যাকেজ)
+    formattedText = formattedText.replace(/2\.\s*Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
+    formattedText = formattedText.replace(/Brand Boost.*?7 কার্যদিবসে Brand delivery/is, cardHtml);
+  }
+
+  // 3. Identity Pro Package
+  if (formattedText.includes("Identity Pro") && formattedText.includes("8,000")) {
+    const cardHtml = `
+      <div class="package-card">
+        <div style="font-size: 0.65rem; background: #f3e8ff; color: #7e22ce; padding: 2px 10px; border-radius: 4px; display: inline-block; margin-bottom: 8px; font-weight: 600;">Pro</div>
+        <div class="pkg-header">Identity Pro</div>
+        <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 12px;">সম্পূর্ণ ব্র্যান্ড ও কনটেন্ট</div>
+        <div class="pkg-price">৳৮,০০০ <span>/ মাস</span></div>
+        <div class="pkg-desc" style="color: #00e5a0; font-size: 0.75rem;">Corporate মান, বাজেট দামে</div>
+        <ul class="pkg-features">
+          <li>Full Brand Identity (Logo, Color, Font, Pattern)</li>
+          <li>Brand Guideline Booklet (৪-৫ পেজ)</li>
+          <li>২২টি Social Media Post</li>
+          <li>৬টি Story + ৩টি Reel Cover</li>
+          <li>Business Card Design</li>
+          <li>১টি Promotional Banner / Flyer</li>
+          <li>Unlimited Revision</li>
+          <li>সব ফরম্যাটে সোর্স ফাইল (AI/PSD/PDF)</li>
+          <li>১ মাস After-Support</li>
+        </ul>
+        <div style="margin-top: 15px; display: flex; gap: 6px; flex-wrap: wrap;">
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">SME</span>
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Agency</span>
+          <span style="font-size: 0.65rem; border: 1px solid var(--border); color: var(--muted); padding: 3px 10px; border-radius: 20px;">Rebranding</span>
+        </div>
+      </div>
+    `;
+    // AI এর প্লেইন টেক্সট রিপ্লেস করা (৩য় প্যাকেজ)
+    formattedText = formattedText.replace(/3\.\s*Identity Pro.*?1 মাস After-Support/is, cardHtml);
+    formattedText = formattedText.replace(/Identity Pro.*?1 মাস After-Support/is, cardHtml);
+  }
+
+  // লাইন ব্রেক ঠিক করা যদি সাধারণ টেক্সট হয়
+  return formattedText.replace(/\n/g, '<br>');
+}
 });
 </script>
 </body>
